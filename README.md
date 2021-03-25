@@ -1,10 +1,10 @@
 ## Chatbot reccomendation project
 
-#Description:
+# Description:
 
 This project is a chatbot operational on Facebook Messenger and its main goal is to recommend books.
 
-#Steps to make it work
+# Steps to make it work
 
 To do the chatbot with Facebook Messenger we have to go on Facebook for developer create a page, generate a token, replace it in the code (development.json) 
 
