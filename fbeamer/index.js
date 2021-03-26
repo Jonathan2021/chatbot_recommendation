@@ -1,7 +1,7 @@
 'use strict'
 const crypto = require('crypto');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const axios = require('axios');
 /** 
  * 
@@ -181,12 +181,24 @@ class FBeamer {
         words = words.split(',');
         console.log(words);
         bookTitlesLiked = words;
-        exec(`python -c "import sys; sys.path.append('.'); from recommender.api import *; print(get_similar_user(1))"`, function (error, stdout, stderr) {
-        console.log('stdout: ' + stdout);
-        console.log('stderr: ' + stderr);
-        if (error !== null) {
-             console.log('exec error: ' + error);
-        }});
+        var commands = ['conda activate fastai', `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(\'hello\'); print(get_similar_book(\'${words[0]}\'))"`];
+        let ls = spawn(commands.join(' & '), { shell:true });
+        ls.stdout.on('data', (data) => {
+          console.log('stout');
+            console.log(data);
+        }
+        );
+        
+        ls.stderr.on('data', (data) => {
+          console.log('stderr');
+          console.log(data);
+      }
+      );
+
+      ls.on('exit', (code) => {
+        console.log('exited with code')
+        console.log(code);
+      })
         return resp;
       }
       if(words[0].match(/what/gi) && words[1].match(/books|book/gi) && words[2].match(/i/gi) && words[3].match(/liked/gi)){
