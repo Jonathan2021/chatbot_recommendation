@@ -4,22 +4,25 @@ from fastai.tabular.all import load_pickle
 import torch
 import numpy as np
 
-def get_book_id(title, series=None, authors=None):
+def get_book_id(title, series=None, authors=None, volume_number=1):
     lookup_id = pd.read_csv('save/book_lookup.csv')
-    title_msk = lookup_id['title'] == title
-    series_msk = np.repeat(True, len(lookup_id)) if series is None else lookup_id['series'].isna() if not series else lookup_id['series'] == series
-    author_msk = np.repeat(True, len(lookup_id)) if authors is None else lookup_id['authors'] == authors
-    book_id = lookup_id[title_msk & series_msk & author_msk].book_id
+    all_true = np.repeat(True, len(lookup_id))
+    title_msk = all_true if not title else lookup_id['title'] == title
+    series_msk = all_true if not series else lookup_id['series'].isna() if not series else lookup_id['series'] == series
+    author_msk = all_true if authors is None else lookup_id['authors'] == authors
+    volume_msk = lookup_id['volume_number'] == volume_number if (title and not series) or (series and not title) else all_true
+    book_id = lookup_id[title_msk & series_msk & author_msk & volume_msk].book_id 
     if len(book_id) == 0:
+        print("No corresponding book", file=sys.stderr)
         exit(1) # No corresponding book
     elif len(book_id) > 1:
+        print("More than 1 book corresponding to search", file=sys.stderr)
         exit(2) # More than 1 corresponding book
 
-    print(book_id)
-    return book_id[0]
+    return book_id.item()
 
-def get_similar_book(title, series=None, authors=None, nb_books=15):
-    book_id = get_book_id(title, series, authors)
+def get_similar_book(title, series=None, authors=None, volume_number=1, nb_books=15):
+    book_id = get_book_id(title, series, authors, volume_number)
     factors = load_pickle('save/book_factors.pkl')
     distances = torch.nn.CosineSimilarity(dim=1)(factors, factors[book_id][None])
     idx = distances.argsort(descending=True)[1: nb_books + 1]
@@ -50,9 +53,9 @@ def get_book_avg(author, pub_year, language_code, genres="", series=None, volume
     *_, rating = model.predict(pd.Series(row))
     return rating.item()
 
-def get_rating_user_book(user_id, title, series=None, authors=None):
+def get_rating_user_book(user_id, title, series=None, authors=None, volume_number=1):
     user_id = int(user_id)
-    book_id = get_book_id(title, series, authors)
+    book_id = get_book_id(title, series, authors, volume_number)
     model = load_pickle('save/nn_collab.pkl')
     data = pd.read_csv('save/book_nn_data.csv')
     data.set_index('book_id', drop = False, inplace=True)
@@ -82,4 +85,5 @@ def main():
     res = fn(*args[2:])
     print(res, end="")
 
-main()
+if __name__ == "__main__":
+    main()
