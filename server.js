@@ -18,6 +18,7 @@ server.post('/', (request, response, data) => {
     const userData = FB.messageHandler(data);
     console.log(userData);
     const resp = FB.getResponse(userData);
+    console.log(resp);
     FB.sendMessage("RESPONSE", userData.sender, resp);
   });
 });

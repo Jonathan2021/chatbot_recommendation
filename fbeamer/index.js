@@ -1,5 +1,6 @@
 'use strict'
 const crypto = require('crypto');
+const fs = require('fs');
 const axios = require('axios');
 /** 
  * 
@@ -24,8 +25,27 @@ function getLanguageCode(langs){
     console.log(err);
   }
 }
-
-
+async function getTitles(){
+  const fileName = 'title.txt';
+  let titles = [];
+  await fs.readFile(fileName, 'utf8', (err, data)=>{
+    if(err)throw err;
+    console.log(data);
+    titles = data;
+  })
+  console.log(titles);
+  titles = titles.split(',');
+  return titles;
+}
+function writeTitles(titles){
+  const fileName = 'title.txt';
+  titles = titles.join(', ');
+  console.log('in writin func');
+  console.log(titles);
+  fs.writeFile(fileName, titles, (err)=>{
+    if(err)throw err;
+  })
+}
 class FBeamer {
   constructor({ pageAccessToken, verifyToken, appSecret }) {
     try {
@@ -148,44 +168,28 @@ class FBeamer {
       }
       if(words[0].match(/i/gi) && words[1].match(/want/gi) && words[2].match(/a/gi) && words[3].match(/book/gi)){
         let resp = 'What kind of books do you like? Can you tell me more about your preferinces?';
-        let resp2 = 'What other books do you like? Can you tell me titles separated by comma, plese?';
+        let resp2 = 'What other books do you like? Can you tell me titles you like or gendres of books?';
         return resp2;
       }
       if(words[0].match(/asdf/gi)){return 'merge ticule';}
       if(words[0].match(/My/gi) && words[1].match(/favorite/gi) && words[2].match(/book|books/gi) && words[3].match(/are|is/gi)){
-        var title = [];//a title can be formed of one or more words
-        for(var i = 4; i<words.length; i++)
-        {
-          if(words[i].match(/,/gi))
-          {
-            var word = words[i];
-            word = word.replace(',', '');
-            title.push(word);
-            bookTitlesLiked.push(title);
-            title = [];
-          }
-          else{
-            title.push(words[i]);
-            if(i === words.length-1){bookTitlesLiked.push(title);}
-          }
-        }
-        console.log(bookTitlesLiked);
-        let resp = 'Nice books, I noticed the titles.';
+        let resp = 'Nice books. Noticed!'
+        words.splice(0, 4);
+        words = words.join();
+        console.log(words);
+        words = words.split(',');
+        console.log(words);
+        bookTitlesLiked = words;
         return resp;
       }
       if(words[0].match(/what/gi) && words[1].match(/books|book/gi) && words[2].match(/i/gi) && words[3].match(/liked/gi)){
+        bookTitlesLiked = getTitles();
         let resp = 'You liked: ';
-        console.log("incepe");
-        bookTitlesLiked.forEach(function(it, i){
-          it.forEach(function(word, index){
-            resp = resp.concat(word);
-            resp = resp.concat(' ');
-            console.log(word);
-          })
-
+        bookTitlesLiked.forEach(book => {
+          resp = resp.concat(book);
           resp = resp.concat(', ');
-        })
-        console.log(resp);
+        });
+        resp = resp.concat('.');
         return resp;
       }
       if(words[0].match(/the/gi) && words[1].match(/writers|writer|author|authors/gi) && words[2].match(/that/gi) && words[3].match(/i/gi) && words[4].match(/like/gi) && words[5].match(/are|is/gi)){
@@ -222,7 +226,7 @@ class FBeamer {
       }
       if(words[0].match(/my/gi) && words[1].match(/favorite/gi) && words[2].match(/types?|gendres?|kinds?/gi) && words[3].match(/are:?|is:?/gi)){
         words.splice(0, 4);//we discard the the first 4 words in order to have just the book types
-        let types = words.join();//we make the again a single string
+        let types = words.join(' ');//we make the again a single string
         bookTypes = types.split(',')//in order to split regarding to the comma
         console.log(bookTypes);
         let resp = 'You liked this book gendres:  ';
