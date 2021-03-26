@@ -1,6 +1,7 @@
 'use strict'
 const crypto = require('crypto');
 const fs = require('fs');
+const { exec } = require('child_process');
 const axios = require('axios');
 /** 
  * 
@@ -25,27 +26,27 @@ function getLanguageCode(langs){
     console.log(err);
   }
 }
-async function getTitles(){
-  const fileName = 'title.txt';
-  let titles = [];
-  await fs.readFile(fileName, 'utf8', (err, data)=>{
-    if(err)throw err;
-    console.log(data);
-    titles = data;
-  })
-  console.log(titles);
-  titles = titles.split(',');
-  return titles;
-}
-function writeTitles(titles){
-  const fileName = 'title.txt';
-  titles = titles.join(', ');
-  console.log('in writin func');
-  console.log(titles);
-  fs.writeFile(fileName, titles, (err)=>{
-    if(err)throw err;
-  })
-}
+// async function getTitles(){
+//   const fileName = 'title.txt';
+//   let titles = [];
+//   await fs.readFile(fileName, 'utf8', (err, data)=>{
+//     if(err)throw err;
+//     console.log(data);
+//     titles = data;
+//   })
+//   console.log(titles);
+//   titles = titles.split(',');
+//   return titles;
+// }
+// function writeTitles(titles){
+//   const fileName = 'title.txt';
+//   titles = titles.join(', ');
+//   console.log('in writin func');
+//   console.log(titles);
+//   fs.writeFile(fileName, titles, (err)=>{
+//     if(err)throw err;
+//   })
+// }
 class FBeamer {
   constructor({ pageAccessToken, verifyToken, appSecret }) {
     try {
@@ -180,6 +181,12 @@ class FBeamer {
         words = words.split(',');
         console.log(words);
         bookTitlesLiked = words;
+        exec(`python -c "import sys; sys.path.append('.'); from recommender.api import *; print(get_similar_user(1))"`, function (error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if (error !== null) {
+             console.log('exec error: ' + error);
+        }});
         return resp;
       }
       if(words[0].match(/what/gi) && words[1].match(/books|book/gi) && words[2].match(/i/gi) && words[3].match(/liked/gi)){
@@ -209,7 +216,7 @@ class FBeamer {
           }
           console.log(writers)  ;
         }
-        let resp = 'What a culter there. I noticed the authors.';
+        let resp = 'What a culter there. I noticed the authors. Can you tell me the language';
         return resp;
       }
       if(words[0].match(/what/gi) && words[1].match(/writer|writers|author|authors/gi) && words[2].match(/i/gi) && words[3].match(/liked/gi)){
@@ -233,6 +240,16 @@ class FBeamer {
         bookTypes.forEach(element => resp.concat(element));
         return resp;
       }
+      if(words[0].match(/I/gi) && words[1].match(/this/gi) && words[2].match(/types?:?|gendres?:?|kinds?:?/gi)){
+        words.splice(0, 3);//we discard the the first 4 words in order to have just the book types
+        let types = words.join(' ');//we make the again a single string
+        bookTypes = types.split(',')//in order to split regarding to the comma
+        console.log(bookTypes);
+        let resp = 'You liked this book gendres:  ';
+        bookTypes.forEach(element => resp.concat(element));
+        return resp;
+      }
+    
       if(words[0].match(/I/gi) && words[1].match(/the/gi) && words[2].match(/the/gi) && words[3].match(/books?/gi) && words[4].match(/to/gi) &&
       words[5].match(/be/gi) && words[6].match(/in:?/gi)){
         words.splice(0, 7);
