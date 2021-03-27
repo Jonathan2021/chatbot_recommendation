@@ -13,10 +13,10 @@ def get_book_id(title, series=None, authors=None, volume_number=1):
     volume_msk = lookup_id['volume_number'] == volume_number if (title and not series) or (series and not title) else all_true
     book_id = lookup_id[title_msk & series_msk & author_msk & volume_msk].book_id 
     if len(book_id) == 0:
-        print("No corresponding book")
+        print("No corresponding book found, check that everuthing is correct (it may not be in database)", file=sys.stderr)
         exit(1) # No corresponding book
     elif len(book_id) > 1:
-        print("More than 1 book corresponding to search")
+        print("More than 1 book corresponding to search, please make your research more specific", file=sys.stderr)
         exit(2) # More than 1 corresponding book
 
     return book_id.item()

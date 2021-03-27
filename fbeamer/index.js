@@ -1,7 +1,7 @@
 'use strict'
 const crypto = require('crypto');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { execSync } = require('child_process');
 const axios = require('axios');
 /** 
  * 
@@ -174,33 +174,26 @@ class FBeamer {
       }
       if(words[0].match(/asdf/gi)){return 'merge ticule';}
       if(words[0].match(/My/gi) && words[1].match(/favorite/gi) && words[2].match(/book|books/gi) && words[3].match(/are|is/gi)){
-        let resp = 'Nice books. Noticed!'
+        let resp = 'Here are similar books: \n';
         words.splice(0, 4);
         words = words.join();
         console.log(words);
         words = words.split(',');
         console.log(words);
         bookTitlesLiked = words;
-        var commands = ['conda activate fastai', `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(\'hello\'); print(get_similar_book(\'${words[0]}\'))"`];
-        let ls = spawn(commands.join(' & '), { shell:true });
-        ls.stdout.on('data', (data) => {
-          console.log('stout');
-            console.log(data);
+        const command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'${words[0]}\'))"`;
+        try
+        {
+            const res = execSync(command);
+            console.log(res.toString());
+            resp += res.toString()
+        } catch(e)
+        {
+            resp = e.stderr.toString();
         }
-        );
-        
-        ls.stderr.on('data', (data) => {
-          console.log('stderr');
-          console.log(data);
-      }
-      );
-
-      ls.on('exit', (code) => {
-        console.log('exited with code')
-        console.log(code);
-      })
         return resp;
       }
+
       if(words[0].match(/what/gi) && words[1].match(/books|book/gi) && words[2].match(/i/gi) && words[3].match(/liked/gi)){
         bookTitlesLiked = getTitles();
         let resp = 'You liked: ';
