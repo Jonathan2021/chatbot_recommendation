@@ -180,47 +180,48 @@ class FBeamer {
         let authors = [];
         let series = [];
         let command = '';
-        words = words.join();
+        words = words.join(' ');
         console.log(words);
-        if((words.match(/the authors? that I like are:?/gi) || words.match(/i like the authors?:?/gi)) && words.match(/the  *series? *that *I *like/gi)){
-          words = words.replace(/and the authors? that I like are:?/gi, '***');
+        if((words.match(/the authors? that I like is:?/gi) || words.match(/i like the authors?:?/gi)) && words.match(/the  *series? *that *I *like/gi)){
+          words = words.replace(/and the authors? that I like is:?/gi, '***');
           //words = words.replace(/and i like the authors?:?/gi, '***');
           words = words.replace(/the  *series? *that *I *like/gi, '***');
           words = words.split('***');
           titles = words[0];
-          titles = title.split(',');
+          titles = titles.trim();
           authors = words[1];
-          authors = authors.split(',');
+          authors = authors.trim();
           series = words[2];
-          authors = authors[0];
-          titles = titles[0];
+          series = series.trim();
           console.log('Titles: '+titles+'\nAuthor: '+authors+'\nSeries: '+series);
-          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series},authors=${authors}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(title=\'${titles}\',series=\'${series}\',authors=\'${authors}\'))"`;
         }
         else if(words.match(/the  *series? *that *I *like/gi)){
           words.split(/the  *series? *that *I *like/gi);
           titles = words[0];
+          titles = titles.trim();
           series = words[1];
+          series = series.trim();
           console.log('Titles: '+'\nSeries: '+series);
-          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(title=\'${titles}\',series=\'${series}\'))"`;
         }
-        else if(words.match(/the authors? that I like are:?/gi) || words.match(/i like the authors?:?/gi)){
-          words = words.replace(/and the authors? that I like are:?/gi, '***');
+        else if(words.match(/the authors? that I like is:?/gi) || words.match(/i like the authors?:?/gi)){
+          words = words.replace(/and the authors? that I like is:?/gi, '***');
           //words = words.replace(/and i like the authors?:?/gi, '***');
+          words = words.split('***');
           titles = words[0];
+          titles = titles.trim();
           authors = words[1];
+          authors = authors.trim();
           console.log('Titles: '+titles+'\nAuthor: '+authors);
-          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},authors=${authors}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(title=\'${titles}\',authors=\'${authors}\'))"`;
         }
         else {
           titles = words;
+          titles = titles.trim();
           console.log('Title: '+titles);
-          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'${titles}\'))"`;
         }
-        console.log(words);
-        words = words.split(',');
-        console.log(words);
-        bookTitlesLiked = words;
         console.log(command);
         // command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'${words[0]}\'))"`;
         try
