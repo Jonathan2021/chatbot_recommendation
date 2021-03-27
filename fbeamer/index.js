@@ -176,12 +176,13 @@ class FBeamer {
       if(words[0].match(/My/gi) && words[1].match(/favorite/gi) && words[2].match(/book|books/gi) && words[3].match(/are|is/gi)){
         let resp = 'Here are similar books: \n';
         words.splice(0, 4);
-        let title = [];
+        let titles = [];
         let authors = [];
         let series = [];
         let command = '';
         words = words.join();
-        if((words.test(/the authors? that I like are:?/gi) || words.test(/i like the authors?:?/gi)) && words.test(/the  *series? *that *I *like/gi)){
+        console.log(words);
+        if((words.match(/the authors? that I like are:?/gi) || words.match(/i like the authors?:?/gi)) && words.match(/the  *series? *that *I *like/gi)){
           words = words.replace(/and the authors? that I like are:?/gi, '***');
           //words = words.replace(/and i like the authors?:?/gi, '***');
           words = words.replace(/the  *series? *that *I *like/gi, '***');
@@ -194,32 +195,33 @@ class FBeamer {
           authors = authors[0];
           titles = titles[0];
           console.log('Titles: '+titles+'\nAuthor: '+authors+'\nSeries: '+series);
-          command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series}authors=${authors}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series},authors=${authors}\'))"`;
         }
-        else if(words.test(/the  *series? *that *I *like/gi)){
+        else if(words.match(/the  *series? *that *I *like/gi)){
           words.split(/the  *series? *that *I *like/gi);
           titles = words[0];
           series = words[1];
           console.log('Titles: '+'\nSeries: '+series);
-          command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},series=${series}\'))"`;
         }
-        else if(words.test(/the authors? that I like are:?/gi) || words.test(/i like the authors?:?/gi)){
+        else if(words.match(/the authors? that I like are:?/gi) || words.match(/i like the authors?:?/gi)){
           words = words.replace(/and the authors? that I like are:?/gi, '***');
           //words = words.replace(/and i like the authors?:?/gi, '***');
           titles = words[0];
           authors = words[1];
           console.log('Titles: '+titles+'\nAuthor: '+authors);
-          command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},authors=${authors}\'))"`;
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles},authors=${authors}\'))"`;
         }
         else {
           titles = words;
-          console.log('Title: '+tiltes);
-          command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles}\'))"`;
+          console.log('Title: '+titles);
+          command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'title=${titles}\'))"`;
         }
         console.log(words);
         words = words.split(',');
         console.log(words);
         bookTitlesLiked = words;
+        console.log(command);
         // command = `conda run -n fastai python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(\'${words[0]}\'))"`;
         try
         {
@@ -228,6 +230,7 @@ class FBeamer {
             resp += res.toString()
         } catch(e)
         {
+          console.log(e);
             resp = e.stderr.toString();
         }
         return resp;
