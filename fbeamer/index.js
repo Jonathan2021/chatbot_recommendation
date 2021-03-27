@@ -196,8 +196,8 @@ class FBeamer {
           console.log('Titles: '+titles+'\nAuthor: '+authors+'\nSeries: '+series);
           command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(title=\'${titles}\',series=\'${series}\',authors=\'${authors}\'))"`;
         }
-        else if(words.match(/the  *series? *that *I *like/gi)){
-          words.split(/the  *series? *that *I *like/gi);
+        else if(words.match(/that belongs to the serie/gi)){
+          words = words.split(/that belongs to the serie/gi);
           titles = words[0];
           titles = titles.trim();
           series = words[1];
@@ -205,8 +205,8 @@ class FBeamer {
           console.log('Titles: '+'\nSeries: '+series);
           command = `python -c "import sys; sys.path.append(\'.\'); from recommender.api import *; print(get_similar_book(title=\'${titles}\',series=\'${series}\'))"`;
         }
-        else if(words.match(/the authors? that I like is:?/gi) || words.match(/i like the authors?:?/gi)){
-          words = words.replace(/and the authors? that I like is:?/gi, '***');
+        else if(words.match(/by/gi) || words.match(/i like the authors?:?/gi)){
+          words = words.replace(/by/gi, '***');
           //words = words.replace(/and i like the authors?:?/gi, '***');
           words = words.split('***');
           titles = words[0];
