@@ -4,13 +4,13 @@ from fastai.tabular.all import load_pickle
 import torch
 import numpy as np
 
-def get_book_id(title, series=None, authors=None, volume_number=1):
+def get_book_id(title, series=None, authors=None, volume_number=None):
     lookup_id = pd.read_csv('save/book_lookup.csv')
     all_true = np.repeat(True, len(lookup_id))
     title_msk = all_true if not title else lookup_id['title'] == title
-    series_msk = all_true if not series else lookup_id['series'].isna() if not series else lookup_id['series'] == series
+    series_msk = all_true if series is None else lookup_id['series'].isna() if series is "" else lookup_id['series'] == series
     author_msk = all_true if authors is None else lookup_id['authors'] == authors
-    volume_msk = lookup_id['volume_number'] == volume_number if (title and not series) or (series and not title) else all_true
+    volume_msk = lookup_id['volume_number'] == volume_number if volume_number else all_true
     book_id = lookup_id[title_msk & series_msk & author_msk & volume_msk].book_id 
     if len(book_id) == 0:
         print("No corresponding book found, check that everuthing is correct (it may not be in database)", file=sys.stderr)
@@ -21,7 +21,7 @@ def get_book_id(title, series=None, authors=None, volume_number=1):
 
     return book_id.item()
 
-def get_similar_book(title, series=None, authors=None, volume_number=1, nb_books=15):
+def get_similar_book(title, series=None, authors=None, volume_number=None, nb_books=15):
     book_id = get_book_id(title, series, authors, volume_number)
     factors = load_pickle('save/book_factors.pkl')
     distances = torch.nn.CosineSimilarity(dim=1)(factors, factors[book_id][None])
@@ -38,7 +38,7 @@ def get_similar_user(user_id, nb_user=6):
     return list(idx)
 
 
-def get_book_avg(author, pub_year, language_code, genres="", series=None, volume_number=1):
+def get_book_avg(author, pub_year, language_code, genres="", series=None, volume_number=None):
     genres = genres.split(',')
     model = load_pickle('save/avg_rating_nn.pkl')
     all_genres = pd.read_csv('save/genres.csv', header=None)[0].values
@@ -53,7 +53,7 @@ def get_book_avg(author, pub_year, language_code, genres="", series=None, volume
     *_, rating = model.predict(pd.Series(row))
     return rating.item()
 
-def get_rating_user_book(user_id, title, series=None, authors=None, volume_number=1):
+def get_rating_user_book(user_id, title, series=None, authors=None, volume_number=None):
     user_id = int(user_id)
     book_id = get_book_id(title, series, authors, volume_number)
     model = load_pickle('save/nn_collab.pkl')
