@@ -4,26 +4,26 @@
 
 This project is a chatbot operational on Facebook Messenger and its main goal is to recommend books.
 
-# Steps to make it work
+# Steps to make it work  
 
-To do the chatbot with Facebook Messenger we have to go on Facebook for developer create a page, generate a token, replace it in the code (development.json) 
+In order to test the chatbot you have to pull the files and to set up an conda environment with specifying the requirements from the requirements.txt file.  
+To do so you have to open an anacoda terminal:  
+`conda create --name fastai --file requirements.txt`  
+  
+We call it fastai because the recommender were built using the [fastai](https://www.fast.ai/) library.
 
-Create a chatbot 
-Create a page
-Add the page on facebook for developers
-After cratea a token
-Put it in development.json in page access token
-Create the verify token you want and put it in the development.json
-Going in the setting basic secret key fb dev
-Copy paste put in the secret key of dev.json
-vs run server.js by `nodemon sever.js`
-The install all the modul missing which are causing an error
-To do this ` npm i <namemodul> ` until no error
-The bot is running on port … -> mean is working
-Stop it and run `npm i -g ngrok` in terminal in order to get ngrok
-After: `ngrok http 3000`
-you have a pop up and take the last url and put in the facebook dev in the weebook section of the messenger settings and you put you verify token too
-you do not press the button to access because you go back in vs code to the server by nodemon server.js
-after in fb dev you press the button to go
-go in the webbook section of the messenger settings to choose messages 
-then when you send a message it responde bonjour
+After that you have to activate the enviroment so you have to run the command `conda activate fastai`;  
+  
+Now you can run our chatbot by running the server.js. You have to make sure that node.js and npm are installed on the machine.  
+
+Run `npm install` from the root of the project (where package.json is) to install all dependencies.
+  
+After, to make the running easier if you do any changes to the code you can run it with `nodemon`. To do so you can install it by:  
+`npm i nodemon`  
+Now you can run the server by `nodemon server.js` (or simply `node server.js`). Make sure you are in the right directory.  
+
+After if errors of missing packages occures. You can fix them by running in the console the command `npm i <missing package name>` and run again the server.js. Repete this process untill all the packages are installed.
+When it runs. You have one more thing to install. Which is the ngrok. You can install it by `npm i ngrok` (you can also do `sudo snap install ngrok` if you are using a Linux-based distribution) and after you have to run it with the command `ngrok http 3000` in order to get the webhook for our chatbot.  
+We have to go on the page of our application from Facebook for developer and register the webhook and the access token that have been set in the file `config/development.json`.  
+Right before register it, you have to make sure that the server is running and after you can register the webhook.  
+Only step left is to go on `Facebook Messenger`, search the page `First Page` and to send the messages you want in order to get some recommended books for you. :)
